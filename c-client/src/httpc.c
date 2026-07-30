@@ -204,7 +204,7 @@ int ws_send_lookup(WSConn *conn, const char *uid_hex) {
 int ws_recv_result(WSConn *conn, LookupResult *out) {
     char buf[4096];
     size_t recvd = 0;
-    const struct curl_ws_frame *meta = NULL;
+    struct curl_ws_frame *meta = NULL;
 
     /* curl_ws_recv can return CURLE_AGAIN if no frame has arrived yet on
      * this non-blocking-under-the-hood socket; retry with a short sleep
