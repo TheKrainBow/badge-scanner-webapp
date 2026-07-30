@@ -23,6 +23,24 @@ a result — printed to stderr, not treated as fatal.
 
 ## Build
 
+### Install dependencies
+
+One-shot dependency installers live in `scripts/` (build toolchain, libcurl,
+PC/SC, and GTK3 for the GUI — cJSON is vendored, so nothing to install for
+it):
+
+```bash
+./scripts/install-deps-fedora.sh    # Fedora / RHEL / Rocky / Alma (dnf)
+./scripts/install-deps-debian.sh    # Debian / Ubuntu and derivatives (apt)
+./scripts/install-deps-macos.sh     # macOS (Homebrew + Xcode CLT)
+```
+
+On macOS, PC/SC is the system `PCSC.framework` rather than a package; the
+Makefile detects macOS automatically (via `uname -s`) and links the
+framework instead of `-lpcsclite`, so plain `make`/`make gui` work with no
+extra flags. The per-distro package lists are also spelled out below if
+you'd rather install by hand.
+
 ### CLI (`make`)
 
 Needs `pcscd` running on the host, dev headers for PC/SC and libcurl, and
