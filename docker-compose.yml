@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      # Optional: only needed if you want a "full"-scope API key
+      # pre-provisioned for some external automation client at first boot.
+      # The dashboard itself needs neither this nor any API key — session
+      # login is its whole auth layer (see backend/internal/auth/auth.go).
+      BOOTSTRAP_API_KEY_ID: ${BOOTSTRAP_API_KEY_ID:-}
+      BOOTSTRAP_API_KEY_SECRET: ${BOOTSTRAP_API_KEY_SECRET:-}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?set ADMIN_USERNAME in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - backend-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE: "" # relative — nginx proxies /api to the backend service, same-origin
+    ports:
+      - "${FRONTEND_PORT:-8000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  backend-data:
