@@ -8,6 +8,10 @@
 #  if __has_include(<winscard.h>)
 #    include <winscard.h>
 #  elif __has_include(<PCSC/winscard.h>)
+/* Apple's PCSC.framework winscard.h doesn't transitively pull in the
+ * BYTE/DWORD/LONG typedefs the way Linux's pcsclite.h does — pull in
+ * wintypes.h explicitly so those names are defined here too. */
+#    include <PCSC/wintypes.h>
 #    include <PCSC/winscard.h>
 #  else
 #    error "winscard.h not found — install libpcsclite-dev (Debian/Ubuntu) or pcsc-lite-devel (Fedora)"

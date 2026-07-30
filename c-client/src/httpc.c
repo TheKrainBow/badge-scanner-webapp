@@ -205,13 +205,18 @@ int ws_recv_result(WSConn *conn, LookupResult *out) {
     char buf[4096];
     size_t recvd = 0;
     struct curl_ws_frame *meta = NULL;
+    /* curl_ws_recv's metap parameter gained a const qualifier in newer
+     * curl (e.g. Homebrew's 8.x) but not in older ones (Debian bookworm's
+     * system 7.88.1) — go through void* so this compiles cleanly against
+     * either signature without a pointer-constness warning. */
+    void *metap = &meta;
 
     /* curl_ws_recv can return CURLE_AGAIN if no frame has arrived yet on
      * this non-blocking-under-the-hood socket; retry with a short sleep
      * rather than busy-spinning, bounded so a server that never replies
      * doesn't hang this forever. */
     for (int waited_ms = 0; waited_ms < 15000; waited_ms += 20) {
-        CURLcode res = curl_ws_recv(conn->curl, buf, sizeof(buf), &recvd, &meta);
+        CURLcode res = curl_ws_recv(conn->curl, buf, sizeof(buf), &recvd, metap);
         if (res == CURLE_OK) {
             return parse_lookup_json(buf, recvd, out);
         }
